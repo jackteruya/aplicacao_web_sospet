@@ -7,6 +7,30 @@ from django.contrib.auth.decorators import login_required
 # Create your views here.
 from .models import Pet
 
+@login_required(login_url="/login/")
+def register_pet(request):
+    return render(request, 'register-pet.html')
+
+@login_required(login_url="/login/")
+def set_pet(request):
+    city = request.POST.get('city')
+    email = request.POST.get('email')
+    phone = request.POST.get('phone')
+    description = request.POST.get('description')
+    photo = request.FILES.get('file')
+    user = request.user
+    pet = Pet.objects.create(city=city, email=email, phone=phone, description=description, photo=photo, user=user)
+
+    url = '/pet/detail/{}/'.format(pet.id)
+    return redirect(url)
+
+@login_required(login_url="/login/")
+def delete_pet(request, id):
+    pet = Pet.objects.get(id=id)
+    if pet.user == request.user:
+        pet.delete()
+    return redirect('/')
+
 @login_required(login_url='/login/')
 def liste_all_pet(request):
     pet = Pet.objects.filter(active=True)
